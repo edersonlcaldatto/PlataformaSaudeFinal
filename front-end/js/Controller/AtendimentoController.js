@@ -88,6 +88,8 @@ var AtendimentoController = new function () {
 	}
 
 	this.edit = function (event) {
+        getPacientesJson(loadPacientes);
+        getMedicosJson(loadMedicos);
 		let idAtendimento = event.target.parentNode.parentNode.querySelector('.idAtendimento').innerText;
 
 		$("#idAtendimento").val(idAtendimento);
@@ -100,7 +102,7 @@ var AtendimentoController = new function () {
 
 	this.setDadosAtendimentoModal = function (atendimento) {
 		$('#atendimentoModalidade').val(atendimento.modalidade);
-		$('#atendimentoProcedimento').val(atendimento.procedimento);
+		$('#atendimentoProcedimento').val(atendimento.nomeProcedimento);
         $('#atendimentoMedico').val(atendimento.medico.nome);
         $('#atendimentoPaciente').val(atendimento.paciente.nome);
 	}
@@ -127,15 +129,37 @@ var AtendimentoController = new function () {
     }
 
     function getPaciente() {
-        return {
-            idPaciente : $('#atendimentoPaciente').val()
+        let valorCampo = $("#atendimentoPaciente").val();
+        let pacienteDtList = document.getElementById("pacientesDataList");
+
+        for (i = 0; i <= pacienteDtList.childNodes.length; i++) {
+            option = pacienteDtList.childNodes[i];
+            if (option.value == valorCampo) {
+                var codigoPaciente = option.id;
+                break;
+            }
         }
+
+        return {
+            idPaciente: codigoPaciente,
+        };
     }
     
     function getMedico() {
-        return  { 
-            idMedico: $('#atendimentoMedico').val() 
+        let valorCampo = $("#atendimentoMedico").val();
+        let medicoDtList = document.getElementById("medicosDataList");
+
+        for (i = 0; i <= medicoDtList.childNodes.length; i++) {
+            option = medicoDtList.childNodes[i];
+            if (option.value == valorCampo) {
+                var codigoMedico = option.id;
+                break;
+            }
         }
+
+        return {
+            idMedico: codigoMedico,
+        };
     }
 
 	function loadAtendimentos(atendimentoJson) {
@@ -178,7 +202,7 @@ var AtendimentoController = new function () {
 		a1.innerText = "Excluir";
 		td.appendChild(a1);
 
-		atendimentoTr.appendChild(td)
+		atendimentoTr.appendChild(td);
 
 		return atendimentoTr;
 	}
@@ -190,6 +214,36 @@ var AtendimentoController = new function () {
 
 		return td;
 	}
+
+    this.populaLookups = function () {
+        getPacientesJson(loadPacientes);
+        getMedicosJson(loadMedicos);
+    };
+
+    function loadPacientes(pacienteList) {
+
+        let pacienteDtList = document.getElementById("pacientesDataList");
+
+        while (pacienteDtList.firstChild) {
+            pacienteDtList.removeChild(pacienteDtList.firstChild);
+        }
+
+        for (i = 0; i <= pacienteList.length; i++) {
+			pacienteDtList.appendChild(createOption(pacienteList[i].idPaciente, pacienteList[i].nome));  
+        }
+    }    
+
+    function loadMedicos(medicosList) {
+        let medicoDtList = document.getElementById("medicosDataList");
+
+        while (medicoDtList.firstChild) {
+            medicoDtList.removeChild(medicoDtList.firstChild);
+        }
+
+        for (i = 0; i <= medicosList.length; i++) {
+            medicoDtList.appendChild(createOption(medicosList[i].idMedico, medicosList[i].nome));
+        }
+    }	
 }
 
 window.onload = AtendimentoController.getAtendimentos();
